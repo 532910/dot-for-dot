@@ -4,12 +4,16 @@ import * as tiles from './tiles.js';
 const tileNames = Object.keys(tiles).sort().reverse();
 let tileIndex = 0;
 
-const colors = [
-	[255,255,255],                           // White
-	[255,0,0], [0,255,0], [0,0,255],         // R G B
-	[255,255,0], [255,0,255], [0,255,255],   // C M Y
-	[0,0,0]                                  // Black
-];
+const colors = {
+	'white':   [255,255,255],
+	'red':     [255,0,0],
+	'green':   [0,255,0],
+	'blue':    [0,0,255],
+	'cyan':    [0,255,255],
+	'magenta': [255,0,255],
+	'yellow':  [255,255,0],
+	'black':   [0,0,0],
+};
 let colorIndex = 0;
 
 
@@ -45,9 +49,23 @@ async function Update( tile, canvas ){
 	canvas.width  = canvas.getBoundingClientRect().width * dpr;
 	canvas.height = canvas.getBoundingClientRect().height * dpr;
 
-	const bitmap = await createImageBitmap( TileToImageData( tiles[tile], colors[colorIndex] ) );
+	const bitmap = await createImageBitmap( TileToImageData( tiles[tile], Object.values(colors)[colorIndex] ) );
 	ctx.fillStyle = ctx.createPattern( bitmap, 'repeat' );
 	ctx.fillRect( 0, 0, canvas.offsetWidth * dpr, canvas.offsetHeight * dpr );
+}
+
+function fillRadios( parent, name, items, checked ){
+	for( const i of items ){
+		const input = document.createElement( 'input' );
+		Object.assign( input, { type: 'radio', name: name, id: i, value: i });
+		input.addEventListener( 'change', (e) => RadioHandler(e) );
+		if( name === 'color' ){
+			input.style.backgroundColor = i;
+		} else if( name === 'tile'){
+		}
+		parent.appendChild( input );
+	}
+	document.getElementById( checked ).checked = true;
 }
 
 let touchStart = { X: 0, Y: 0 };
@@ -67,14 +85,19 @@ addOnLoad( ()=>{
 	window.addEventListener( 'touchstart',  EventHandler );
 	window.addEventListener( 'touchend',    EventHandler );
 	window.addEventListener( 'contextmenu', EventHandler );
+
+	fillRadios( document.getElementById( 'colors' ), 'color', Object.keys(colors), 'white' );
+	fillRadios( document.getElementById( 'tiles' ), 'tile', tileNames, 'tileX9' );
 })
 
 function Color( x ){
-	colorIndex = ( colorIndex + x + colors.length ) % colors.length;
+	colorIndex = ( colorIndex + x + Object.values(colors).length ) % Object.values(colors).length;
+	document.getElementById( Object.keys(colors)[colorIndex] ).checked = true;
 	Redraw();
 }
 function Pattern( x ){
 	tileIndex = ( tileIndex + x + tileNames.length) % tileNames.length;
+	document.getElementById( tileNames[tileIndex] ).checked = true;
 	Redraw();
 }
 
@@ -89,6 +112,19 @@ function ToggleFullscreen(){
 	} else {
 		document.documentElement.requestFullscreen();
 	}
+}
+
+function RadioHandler( e ){
+	switch( e.target.name ){
+		case 'color':
+			colorIndex = Object.keys(colors).indexOf( e.target.id );
+			break;
+		case 'tile':
+			tileIndex = tileNames.indexOf( e.target.id );
+			break;
+	}
+	const canvas = document.getElementById( 'canvas' );
+	Update( tileNames[tileIndex], canvas );
 }
 
 function EventHandler( e ){

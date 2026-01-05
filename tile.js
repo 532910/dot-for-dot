@@ -128,6 +128,8 @@ function RadioHandler( e ){
 }
 
 function EventHandler( e ){
+//	document.getElementById( 'help' ).style.display = 'none';
+	document.getElementById( 'help' ).style.opacity = 0;
 	switch( e.type ){
 		case 'keydown':
 			switch( e.key ){

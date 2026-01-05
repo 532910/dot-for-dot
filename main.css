@@ -80,3 +80,13 @@ input[type="radio"]:checked {
 @media screen and (min-width: 15cm) {
 	.select { width: 50%; }
 }
+
+#help {
+	position: fixed;
+	top: 45%;
+	background-color: black;
+	padding: 1em;
+	font-size: 22pt;
+	box-shadow: 0 0 16px 16px black;
+	transition: opacity 1s ease-in-out;
+}
